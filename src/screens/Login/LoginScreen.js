@@ -1,10 +1,12 @@
 import { Button, Content, Form, Text, View } from 'native-base';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
+import { Field, Form as FinalForm } from 'react-final-form';
 import { Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Field, reduxForm } from 'redux-form';
-import InputReduxForm from '../../components/form/InputReduxForm';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+import InputForm from '../../components/form/InputForm';
 import { loginAction } from '../../logics/login';
 
 class LoginComponent extends PureComponent {
@@ -13,7 +15,7 @@ class LoginComponent extends PureComponent {
   };
 
   render() {
-    const { submit, navigation } = this.props;
+    const { onLoginClick, navigation } = this.props;
     return (
       <KeyboardAwareScrollView
         enableOnAndroid
@@ -24,22 +26,30 @@ class LoginComponent extends PureComponent {
       >
         <Content>
 
-          <Form>
-            <Field name="email" component={InputReduxForm} label="Email" />
-            <Field name="password" component={InputReduxForm} label="Password" secureTextEntry />
-          </Form>
+          <FinalForm
+            onSubmit={({ email, password }) => onLoginClick(email, password)}
+            render={({ handleSubmit }) => (
+              <View>
 
-          <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="center" >
+                <Form>
+                  <Field name="email" component={InputForm} label="Email" />
+                  <Field name="password" component={InputForm} label="Password" secureTextEntry />
+                </Form>
 
-            <Button style={{ marginRight: 25 }} onPress={() => submit()}>
-              <Text>Login</Text>
-            </Button>
+                <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="center" >
 
-            <Button onPress={() => navigation.navigate('SignUp')}>
-              <Text>Sign up</Text>
-            </Button>
+                  <Button style={{ marginRight: 25 }} onPress={() => handleSubmit()}>
+                    <Text>Login</Text>
+                  </Button>
 
-          </View>
+                  <Button onPress={() => navigation.navigate('SignUp')}>
+                    <Text>Sign up</Text>
+                  </Button>
+
+                </View>
+              </View>
+            )}
+          />
 
         </Content>
       </KeyboardAwareScrollView>
@@ -48,14 +58,23 @@ class LoginComponent extends PureComponent {
 }
 
 LoginComponent.propTypes = {
-  submit: PropTypes.func.isRequired,
+  onLoginClick: PropTypes.func.isRequired,
   navigation: PropTypes.object.isRequired, // eslint-disable-line react/forbid-prop-types
 };
 
-const LoginScreen = reduxForm({
-  form: 'login',
-  onSubmit: ({ email, password }, dispatch) => dispatch(loginAction(email, password)),
-})(LoginComponent);
+const mapStateToProps = createStructuredSelector({
+});
+
+const mapDispatchToProps = dispatch => ({
+  onLoginClick: (email, password) => {
+    dispatch(loginAction(email, password));
+  },
+});
+
+const LoginScreen = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(LoginComponent);
 
 export default LoginScreen;
 

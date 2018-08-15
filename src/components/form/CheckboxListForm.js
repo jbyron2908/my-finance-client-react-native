@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import { List } from 'native-base';
 import React from 'react';
-import { WrappedFieldProps } from 'redux-form';
-import CheckboxItem from './CheckboxItem';
+import PropTypes from 'prop-types';
+import CheckboxItemForm from './CheckboxItemForm';
 
-const CheckboxListReduxForm = (props) => {
+const CheckboxListForm = (props) => {
   const {
     data,
     input: { value, onChange },
@@ -16,7 +16,7 @@ const CheckboxListReduxForm = (props) => {
       {_.map(data, (item) => {
         const { label, value: itemValue } = item;
         return (
-          <CheckboxItem
+          <CheckboxItemForm
             label={label}
             checkValue={itemValue}
             onChange={onChange}
@@ -30,8 +30,11 @@ const CheckboxListReduxForm = (props) => {
   );
 };
 
-CheckboxListReduxForm.propTypes = {
-  ...WrappedFieldProps,
+/* eslint-disable */
+CheckboxListForm.propTypes = {
+  data: PropTypes.array.isRequired,
+  input: PropTypes.object.isRequired,
 };
+/* eslint-enable */
 
-export default CheckboxListReduxForm;
+export default CheckboxListForm;

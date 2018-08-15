@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { Body, Left, ListItem, Icon, Text, Right } from 'native-base';
+import { Body, Icon, ListItem, Right, Text } from 'native-base';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 
-class CheckboxItem extends Component {
+class CheckboxItemForm extends PureComponent {
   constructor() {
     super();
     this.state = {
@@ -18,13 +18,17 @@ class CheckboxItem extends Component {
   }
 
   markChecked() {
-    const { value, onChange, checkValue } = this.props;
-    onChange(_.concat(value, checkValue));
+    const { input: { value, onChange }, checkValue } = this.props;
+    if (value) {
+      onChange(_.concat(value, checkValue));
+    } else {
+      onChange([checkValue]);
+    }
     this.setState({ selected: true });
   }
 
   markUnchecked() {
-    const { value, onChange, checkValue } = this.props;
+    const { input: { value, onChange }, checkValue } = this.props;
     onChange(_.remove(value, n => n !== checkValue));
     this.setState({ selected: false });
   }
@@ -40,9 +44,7 @@ class CheckboxItem extends Component {
 
     return (
       <ListItem selected={selected} onPress={() => this.toogle()}>
-        <Left>
-          <Icon active={selected} name="checkbox" />
-        </Left>
+        <Icon active={selected} name="checkbox" />
         <Body>
           <Text>{label}</Text>
         </Body>
@@ -52,17 +54,16 @@ class CheckboxItem extends Component {
   }
 }
 
-CheckboxItem.propTypes = {
+CheckboxItemForm.propTypes = {
+  input: PropTypes.object.isRequired, // eslint-disable-line
   label: PropTypes.string.isRequired,
-  value: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onChange: PropTypes.func.isRequired,
   defaultValue: PropTypes.bool,
   checkValue: PropTypes.oneOfType(PropTypes.bool, PropTypes.string),
 };
 
-CheckboxItem.defaultProps = {
-  defaultValue: true,
+CheckboxItemForm.defaultProps = {
+  defaultValue: false,
   checkValue: true,
 };
 
-export default CheckboxItem;
+export default CheckboxItemForm;

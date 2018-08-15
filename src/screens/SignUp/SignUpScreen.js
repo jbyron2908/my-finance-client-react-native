@@ -1,12 +1,11 @@
 import { Button, Content, Form, Text, View } from 'native-base';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { connect } from 'react-redux';
-import { Field, reduxForm } from 'redux-form';
+import { Field, Form as FinalForm } from 'react-final-form';
 import { createStructuredSelector } from 'reselect';
-import InputReduxForm from '../../components/form/InputReduxForm';
+import InputForm from '../../components/form/InputForm';
 
 class SignUpComponent extends Component {
   static navigationOptions = {
@@ -14,8 +13,6 @@ class SignUpComponent extends Component {
   };
 
   render() {
-    const { submit } = this.props;
-
     return (
       <KeyboardAwareScrollView
         enableOnAndroid
@@ -26,17 +23,24 @@ class SignUpComponent extends Component {
       >
         <Content>
 
-          <Form>
-            <Field name="email" component={InputReduxForm} label="Email" />
-            <Field name="password" component={InputReduxForm} label="Password" secureTextEntry />
-            <Field name="passwordConfirm" component={InputReduxForm} label="Password Confirm" secureTextEntry />
-          </Form>
+          <FinalForm
+            onSubmit={values => console.log(values)}
+            render={({ handleSubmit }) => (
+              <View>
+                <Form>
+                  <Field name="email" component={InputForm} label="Email" />
+                  <Field name="password" component={InputForm} label="Password" secureTextEntry />
+                  <Field name="passwordConfirm" component={InputForm} label="Password Confirm" secureTextEntry />
+                </Form>
 
-          <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="space-around" >
-            <Button onPress={() => submit()}>
-              <Text>Sign up</Text>
-            </Button>
-          </View>
+                <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="space-around" >
+                  <Button onPress={() => handleSubmit()}>
+                    <Text>Sign up</Text>
+                  </Button>
+                </View>
+              </View>
+          )}
+          />
 
         </Content>
       </KeyboardAwareScrollView>
@@ -46,7 +50,6 @@ class SignUpComponent extends Component {
 
 
 SignUpComponent.propTypes = {
-  submit: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -57,15 +60,10 @@ const mapDispatchToProps = () => ({
 
 });
 
-const SignUpForm = reduxForm({
-  form: 'login',
-  onSubmit: values => console.log(values),
-})(SignUpComponent);
-
 const SignUpScreen = connect(
   mapStateToProps,
   mapDispatchToProps,
-)(SignUpForm);
+)(SignUpComponent);
 
 export default SignUpScreen;
 

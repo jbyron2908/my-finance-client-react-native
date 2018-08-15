@@ -1,16 +1,16 @@
-import _ from 'lodash';
 import aigle from 'aigle';
+import _ from 'lodash';
 import { Button, Content, Form, Text, View } from 'native-base';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
 import { Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { connect } from 'react-redux';
-import { Field, reduxForm } from 'redux-form';
+import { Field, Form as FinalForm } from 'react-final-form';
 import { createStructuredSelector } from 'reselect';
-import InputReduxForm from '../../components/form/InputReduxForm';
-import database from '../../rxdb/database/database';
+import InputForm from '../../components/form/InputForm';
 import { syncAction } from '../../logics/sync';
+import database from '../../rxdb/database/database';
 
 aigle.mixin(_);
 
@@ -82,7 +82,7 @@ class RxDBComponent extends PureComponent {
   }
 
   render() {
-    const { submit, onSyncClick } = this.props;
+    const { onSyncClick } = this.props;
     return (
       <KeyboardAwareScrollView
         enableOnAndroid
@@ -93,23 +93,37 @@ class RxDBComponent extends PureComponent {
       >
         <Content>
 
-          <Form>
-            <Field name="name" component={InputReduxForm} label="Name" />
-            <Field name="email" component={InputReduxForm} label="Email" />
-          </Form>
+          <FinalForm
+            onSubmit={async ({ name }) => {
+              try {
+                const db = await database.getInstance();
+                await db.users.insert({ name, email: `${name}@symbio.com` });
+              } catch (error) {
+                console.log('insert fail');
+                console.log(error);
+              }
+            }}
+            render={({ handleSubmit }) => (
+              <View>
+                <Form>
+                  <Field name="name" component={InputForm} label="Name" />
+                  <Field name="email" component={InputForm} label="Email" />
+                </Form>
 
-          <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="center" >
+                <View style={{ marginTop: 10 }} flexDirection="row" justifyContent="center" >
 
-            <Button style={{ marginRight: 25 }} onPress={() => submit()}>
-              <Text>Create User</Text>
-            </Button>
+                  <Button style={{ marginRight: 25 }} onPress={() => handleSubmit()}>
+                    <Text>Create User</Text>
+                  </Button>
 
-            <Button onPress={async () => { await this.getUsers(); }}>
-              <Text>Get Users</Text>
-            </Button>
+                  <Button onPress={async () => { await this.getUsers(); }}>
+                    <Text>Get Users</Text>
+                  </Button>
 
-          </View>
-
+                </View>
+              </View>
+          )}
+          />
           <View flexDirection="row" justifyContent="center">
             <Button onPress={async () => { await this.removeUsers(); }}>
               <Text>Remove Users</Text>
@@ -141,7 +155,6 @@ class RxDBComponent extends PureComponent {
 }
 
 RxDBComponent.propTypes = {
-  submit: PropTypes.func.isRequired,
   onSyncClick: PropTypes.func.isRequired,
 };
 
@@ -154,23 +167,10 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-const RxDBForm = reduxForm({
-  form: 'rxdb',
-  onSubmit: async ({ name }) => {
-    try {
-      const db = await database.getInstance();
-      await db.users.insert({ name, email: `${name}@symbio.com` });
-    } catch (error) {
-      console.log('insert fail');
-      console.log(error);
-    }
-  },
-})(RxDBComponent);
-
 const RxDBScreen = connect(
   mapStateToProps,
   mapDispatchToProps,
-)(RxDBForm);
+)(RxDBComponent);
 
 export default RxDBScreen;
 
